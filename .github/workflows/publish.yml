@@ -28,10 +28,10 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       working-directory: src/ServiceControl_Exporter
     - name: Publish
-      run: dotnet publish --no-restore
+      run: dotnet publish --no-restore -o artifacts --no-build 
       working-directory: src/ServiceControl_Exporter
     - name: Download a Build Artifact
       uses: actions/download-artifact@v3.0.0
       with:
         name: artifacts
-        path: src/ServiceControl_Exporter/ServiceControl_Exporter/bin/Release/net6.0/publish/**/*
+        path: artifacts/**/*
