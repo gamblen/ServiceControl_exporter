@@ -20,12 +20,16 @@ jobs:
         include-prerelease: true
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: src/ServiceControl_Exporter
     - name: Build
       run: dotnet build --no-restore
+      working-directory: src/ServiceControl_Exporter
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      working-directory: src/ServiceControl_Exporter
     - name: Publish
       run: dotnet publish --no-restore
+      working-directory: src/ServiceControl_Exporter
     - name: Download a Build Artifact
       uses: actions/download-artifact@v3.0.0
       with:
