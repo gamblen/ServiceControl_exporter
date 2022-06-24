@@ -1,0 +1,51 @@
+name: .NET Windows Service
+
+on:
+  push:
+    branches: [ "main", "ci" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.x'        
+    - name: Update AssemblyInfo
+      uses: gittools/actions/gitversion/execute@v0.9.7  
+      with:
+        useConfigFile: true
+        updateAssemblyInfo: true
+        updateAssemblyInfoFilename: src/ServiceControl_Exporter/ServiceControl_Exporter/Properties/AssemblyInfo.cs
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+        include-prerelease: true
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: src/ServiceControl_Exporter
+    - name: Build
+      run: dotnet build --no-restore
+      working-directory: src/ServiceControl_Exporter
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      working-directory: src/ServiceControl_Exporter
+    - name: Publish
+      run: dotnet publish --no-restore -o artifacts --no-build 
+      working-directory: src/ServiceControl_Exporter
+    - name: Artifacts
+      uses: actions/upload-artifact@v3.0.0
+      with:
+        name: artifacts
+        path: src/ServiceControl_Exporter/artifacts/**/*
