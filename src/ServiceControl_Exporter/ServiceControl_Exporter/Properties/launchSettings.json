@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "ServiceControl_Exporter": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "publishAllPorts": true
+    }
+  }
+}
