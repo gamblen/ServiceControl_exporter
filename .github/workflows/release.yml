@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
@@ -50,3 +49,30 @@ jobs:
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
+        
+  metadata:
+    name: Publish Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v1
+      with:
+        name: artifacts
+
+    - name: Set output
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+    - name: Install zip
+      uses: montudor/action-zip@v1
+
+    - name: Zip output
+      run: zip -qq -r ../ServiceControl_Exporter_${{ steps.vars.outputs.tag }}.zip *
+      working-directory: artifacts
+
+    - uses: ncipollo/release-action@v1
+      with:
+        artifacts: ServiceControl_Exporter_${{ steps.vars.outputs.tag }}.zip
+        token: ${{ secrets.GITHUB_TOKEN }}
