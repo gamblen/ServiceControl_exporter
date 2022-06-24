@@ -30,9 +30,9 @@ public class UpdateMonitoringMetricsCommandHandler : IRequestHandler<UpdateMonit
             var response = await url.SetQueryParam("history", "1").GetJsonListAsync(cancellationToken).ConfigureAwait(false);
 
             if (!_metrics.ContainsKey("servicecontrol_monitoring_endpoints"))
-                _metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateHistogram("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
+                _metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateGauge("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
 
-            if (_metrics["servicecontrol_heartbeats_stats"] is Gauge gauge)
+            if (_metrics["servicecontrol_monitoring_endpoints"] is Gauge gauge)
             {
                 foreach (var item in response)
                 {
