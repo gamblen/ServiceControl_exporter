@@ -30,15 +30,8 @@ jobs:
     - name: Publish
       run: dotnet publish --no-restore -o artifacts --no-build 
       working-directory: src/ServiceControl_Exporter
-
-    - name: MyScripts
-      run: |
-          pwd
-          gci -Recurse .
-      shell: pwsh
-
-    - name: Download a Build Artifact
-      uses: actions/download-artifact@v3.0.0
+    - name: Artifacts
+      uses: actions/upload-artifact@v3.0.0
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
