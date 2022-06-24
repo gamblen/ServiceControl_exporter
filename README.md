@@ -1,5 +1,7 @@
 # ServiceControl_exporter
 
+[![.NET Windows Service](https://github.com/gamblen/ServiceControl_exporter/actions/workflows/publish.yml/badge.svg)](https://github.com/gamblen/ServiceControl_exporter/actions/workflows/publish.yml)
+
 ### What is it
 This exporter is there to convert the values from [Particular Softwares Service Control](https://github.com/Particular/ServiceControl/) to [Prometheus](https://github.com/prometheus-net/prometheus-net).
 
