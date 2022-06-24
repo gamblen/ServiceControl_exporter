@@ -31,13 +31,11 @@ jobs:
       run: dotnet publish --no-restore -o artifacts --no-build 
       working-directory: src/ServiceControl_Exporter
 
-    - uses: Amadevus/pwsh-script@v2
-      id: my-script
-      with:
-        script: |
+    - name: MyScripts
+      run: |
           pwd
           gci -Recurse .
-    - run: echo "${{ steps.my-script.outputs.result }}"
+      shell: pwsh
 
     - name: Download a Build Artifact
       uses: actions/download-artifact@v3.0.0
