@@ -41,7 +41,6 @@ internal class Program
         return Host.CreateDefaultBuilder(args)
                    .UseWindowsService()
                    .UseSystemd()
-                   .UseConsoleLifetime()
                    .ConfigureServices(c =>
                                       {
                                           c.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().Get<AppSettings>());
