@@ -42,7 +42,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       working-directory: src/ServiceControl_Exporter
     - name: Publish
-      run: dotnet publish --no-restore -o artifacts --no-build 
+      run: dotnet publish src/ServiceControl_Exporter/ServiceControl_Exporter.csproj -o artifacts 
       working-directory: src/ServiceControl_Exporter
     - name: Artifacts
       uses: actions/upload-artifact@v3.1.2
