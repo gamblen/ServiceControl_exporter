@@ -2,6 +2,6 @@
 
 using MediatR;
 
-public class UpdateCustomChecksMetricsCommand : IRequest<Unit>
+public class UpdateCustomChecksMetricsCommand : IRequest
 {
 }

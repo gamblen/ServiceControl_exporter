@@ -2,6 +2,6 @@
 
 using MediatR;
 
-public class UpdateErrorMetricsCommand : IRequest<Unit>
+public class UpdateErrorMetricsCommand : IRequest
 {
 }

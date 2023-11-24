@@ -18,11 +18,11 @@ public class UpdateHeartBeatMetricsCommandHandler : IRequestHandler<UpdateHeartB
         _configuration = configuration;
     }
 
-    public async Task<Unit> Handle(UpdateHeartBeatMetricsCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateHeartBeatMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_configuration.Include.HeartBeats) return Unit.Value;
+            if (!_configuration.Include.HeartBeats) return;
 
             var url = Url.Combine(_configuration.ServiceControl.Url,
                                   "heartbeats",
@@ -43,7 +43,5 @@ public class UpdateHeartBeatMetricsCommandHandler : IRequestHandler<UpdateHeartB
         {
             // TODO: error handling
         }
-
-        return Unit.Value;
     }
 }

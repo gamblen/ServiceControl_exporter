@@ -18,11 +18,11 @@ public class UpdateCustomChecksMetricsCommandHandler : IRequestHandler<UpdateCus
         _configuration = configuration;
     }
 
-    public async Task<Unit> Handle(UpdateCustomChecksMetricsCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateCustomChecksMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_configuration.Include.CustomChecks) return Unit.Value;
+            if (!_configuration.Include.CustomChecks) return;
 
             var url = Url.Combine(_configuration.ServiceControl.Url,
                                   "customchecks");
@@ -45,6 +45,5 @@ public class UpdateCustomChecksMetricsCommandHandler : IRequestHandler<UpdateCus
         {
             // TODO: error handling
         }
-
-        return Unit.Value;
-    } }
+    }
+}

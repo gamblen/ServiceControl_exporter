@@ -18,11 +18,11 @@ public class UpdateErrorMetricsCommandHandler : IRequestHandler<UpdateErrorMetri
         _configuration = configuration;
     }
 
-    public async Task<Unit> Handle(UpdateErrorMetricsCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateErrorMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_configuration.Include.Errors) return Unit.Value;
+            if (!_configuration.Include.Errors) return;
 
             var url = Url.Combine(_configuration.ServiceControl.Url,
                                   "errors");
@@ -40,7 +40,5 @@ public class UpdateErrorMetricsCommandHandler : IRequestHandler<UpdateErrorMetri
         {
             // TODO: error handling
         }
-
-        return Unit.Value;
     }
 }

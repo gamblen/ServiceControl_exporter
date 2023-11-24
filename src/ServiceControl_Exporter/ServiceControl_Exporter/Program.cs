@@ -46,7 +46,7 @@ internal class Program
                                           c.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().Get<AppSettings>());
                                           c.AddSingleton<CollectorDictionary>();
                                           c.AddHostedService<PrometheusExporter>();
-                                          c.AddMediatR(typeof(Program));
+                                          c.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
                                       })
                    .ConfigureLogging(c => c.AddConsole());
     }
