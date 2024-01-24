@@ -45,7 +45,7 @@ jobs:
       run: dotnet publish ServiceControl_Exporter/ServiceControl_Exporter.csproj -o artifacts 
       working-directory: src/ServiceControl_Exporter
     - name: Artifacts
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v4.3.0
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
