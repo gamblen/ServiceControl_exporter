@@ -2,7 +2,7 @@
 
 using Prometheus;
 
-public class CollectorDictionary : Dictionary<string, Collector>
+public sealed class CollectorDictionary : Dictionary<string, Collector>
 {
 
 }

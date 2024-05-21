@@ -1,5 +1,6 @@
 ﻿namespace ServiceControl_Exporter;
 
+using System.Net;
 using Commands;
 using Config;
 using Flurl.Http;
@@ -20,16 +21,24 @@ internal class Program
 
         var appSettings = host.Services.GetRequiredService<AppSettings>();
 
-        FlurlHttp.Configure(settings =>
-                            {
-                                settings.HttpClientFactory = new ProxyHttpClientFactory(appSettings.ProxyUrl);
-                            });
+        FlurlHttp.Clients.WithDefaults(settings =>
+                                       {
+                                           settings.ConfigureInnerHandler(handler =>
+                                                                          {
+                                                                              if (!string.IsNullOrWhiteSpace(appSettings.ProxyUrl))
+                                                                              {
+                                                                                  handler.Proxy = new WebProxy(new Uri(appSettings.ProxyUrl));
+                                                                                  handler.UseProxy = true;
+                                                                              }
+                                                                          });
+                                       });
 
         Metrics.DefaultRegistry.AddBeforeCollectCallback(async cancel =>
                                                          {
+                                                             await mediator.Send(new UpdateEndpointStatsMetricsCommand(), cancel).ConfigureAwait(false);
                                                              await mediator.Send(new UpdateErrorMetricsCommand(), cancel).ConfigureAwait(false);
                                                              await mediator.Send(new UpdateCustomChecksMetricsCommand(), cancel).ConfigureAwait(false);
-                                                             await mediator.Send(new UpdateHeartBeatMetricsCommand(), cancel).ConfigureAwait(false);
+                                                             await mediator.Send(new UpdateHeartBeatStatsMetricsCommand(), cancel).ConfigureAwait(false);
                                                              await mediator.Send(new UpdateMonitoringMetricsCommand(), cancel).ConfigureAwait(false);
                                                          });
 

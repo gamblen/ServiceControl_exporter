@@ -7,38 +7,29 @@ using Flurl.Http;
 using MediatR;
 using Prometheus;
 
-public class UpdateErrorMetricsCommandHandler : IRequestHandler<UpdateErrorMetricsCommand>
+public sealed class UpdateErrorMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateErrorMetricsCommand>
 {
-    private readonly CollectorDictionary _metrics;
-    private readonly AppSettings _configuration;
-
-    public UpdateErrorMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration)
-    {
-        _metrics = metrics;
-        _configuration = configuration;
-    }
-
     public async Task Handle(UpdateErrorMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_configuration.Include.Errors) return;
+            if (!configuration.Include.Errors) return;
 
-            var url = Url.Combine(_configuration.ServiceControl.Url,
+            var url = Url.Combine(configuration.ServiceControl.Url,
                                   "errors");
 
             var response = await $"{url}?status=unresolved".SendAsync(HttpMethod.Head, cancellationToken: cancellationToken).ConfigureAwait(false);
             if (response.Headers.TryGetFirst("Total-Count", out var totalCountString) &&
                 double.TryParse(totalCountString, out var totalCount))
             {
-                if (!_metrics.ContainsKey("servicecontrol_errors_unresolved"))
-                    _metrics.Add("servicecontrol_errors_unresolved", Metrics.CreateGauge("servicecontrol_errors_unresolved", "unresolved error count", "unresolved_error_count"));
-                (_metrics["servicecontrol_errors_unresolved"] as Gauge)?.Set(totalCount);
+                if (!metrics.ContainsKey("servicecontrol_errors_unresolved"))
+                    metrics.Add("servicecontrol_errors_unresolved", Metrics.CreateGauge("servicecontrol_errors_unresolved", "unresolved error count", "unresolved_error_count"));
+                (metrics["servicecontrol_errors_unresolved"] as Gauge)?.Set(totalCount);
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            // TODO: error handling
+            Console.WriteLine(e);
         }
     }
 }

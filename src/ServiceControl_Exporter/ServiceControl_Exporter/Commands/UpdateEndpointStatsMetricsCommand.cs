@@ -2,6 +2,6 @@
 
 using MediatR;
 
-public class UpdateHeartBeatMetricsCommand : IRequest
+public sealed class UpdateEndpointStatsMetricsCommand : IRequest
 {
 }

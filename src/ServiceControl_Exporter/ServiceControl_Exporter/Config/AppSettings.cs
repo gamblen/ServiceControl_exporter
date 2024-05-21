@@ -1,6 +1,6 @@
 ﻿namespace ServiceControl_Exporter.Config;
 
-public class AppSettings
+public sealed class AppSettings
 {
     public Exporter Exporter { get; set; } = new();
 

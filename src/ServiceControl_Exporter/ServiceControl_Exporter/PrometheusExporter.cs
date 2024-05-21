@@ -4,15 +4,10 @@ using Config;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
 
-internal class PrometheusExporter : IHostedService
+internal class PrometheusExporter(AppSettings configuration) : IHostedService
 {
-    private readonly KestrelMetricServer _server;
-
-    public PrometheusExporter(AppSettings configuration)
-    {
-        _server = new KestrelMetricServer(configuration.Exporter.Host,
-                                          configuration.Exporter.Port);
-    }
+    private readonly KestrelMetricServer _server = new KestrelMetricServer(configuration.Exporter.Host,
+                                                                           configuration.Exporter.Port);
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
