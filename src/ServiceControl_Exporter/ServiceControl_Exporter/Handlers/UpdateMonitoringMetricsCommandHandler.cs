@@ -5,51 +5,48 @@ using Config;
 using Flurl;
 using Flurl.Http;
 using MediatR;
-using Models.Metrics;
 using Prometheus;
-using Metrics = Prometheus.Metrics;
 
-public class UpdateMonitoringMetricsCommandHandler : IRequestHandler<UpdateMonitoringMetricsCommand>
+public sealed class UpdateMonitoringMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateMonitoringMetricsCommand>
 {
-    private readonly CollectorDictionary _metrics;
-    private readonly AppSettings _configuration;
-
-    public UpdateMonitoringMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration)
-    {
-        _metrics = metrics;
-        _configuration = configuration;
-    }
-
     public async Task Handle(UpdateMonitoringMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!_configuration.Include.Monitoring ||
-                _configuration.ServiceControl.MonitoringUrls == null ||
-                !_configuration.ServiceControl.MonitoringUrls.Any())
+            if (!configuration.Include.Monitoring ||
+                configuration.ServiceControl.MonitoringUrls == null ||
+                !configuration.ServiceControl.MonitoringUrls.Any())
                 return;
 
-            if (!_metrics.ContainsKey("servicecontrol_monitoring_endpoints"))
-                _metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateGauge("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
+            if (!metrics.ContainsKey("servicecontrol_monitoring_endpoints"))
+                //_metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateHistogram("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
+                metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateGauge("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
 
-            foreach (var monitoringUrl in _configuration.ServiceControl.MonitoringUrls)
+            foreach (var monitoringUrl in configuration.ServiceControl.MonitoringUrls)
             {
                 try
                 {
                     var url = Url.Combine(monitoringUrl, "monitored-endpoints");
 
 
-                    var response = await url.SetQueryParam("history", "1").GetJsonAsync<IList<Root>>(cancellationToken).ConfigureAwait(false);
+                    var response = await url.SetQueryParam("history", "1").GetJsonAsync<IList<Models.ServiceControl.Monitoring.Root>>(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                    if (_metrics["servicecontrol_monitoring_endpoints"] is Gauge gauge)
+                    if (metrics["servicecontrol_monitoring_endpoints"] is Gauge gauge)
+                    //if (_metrics["servicecontrol_monitoring_endpoints"] is Histogram histogram)
                     {
                         foreach (var item in response)
                         {
-                            gauge.WithLabels(item.name, "processingTime").Set(item.metrics.processingTime.average);
-                            gauge.WithLabels(item.name, "criticalTime").Set(item.metrics.criticalTime.average);
-                            gauge.WithLabels(item.name, "retries").Set(item.metrics.retries.average);
-                            gauge.WithLabels(item.name, "throughput").Set(item.metrics.throughput.average);
-                            gauge.WithLabels(item.name, "queueLength").Set(item.metrics.queueLength.average);
+                            //(histogram.WithLabels(item.name, "processingTime") as Histogram)?.Observe(item.metrics.processingTime.average);
+                            //(histogram.WithLabels(item.name, "criticalTime") as Histogram)?.Observe(item.metrics.criticalTime.average);
+                            //(histogram.WithLabels(item.name, "retries") as Histogram)?.Observe(item.metrics.retries.average);
+                            //(histogram.WithLabels(item.name, "throughput") as Histogram)?.Observe(item.metrics.throughput.average);
+                            //(histogram.WithLabels(item.name, "queueLength") as Histogram)?.Observe(item.metrics.queueLength.average);
+
+                            gauge.WithLabels(item.Name, "processingTime").Set(item.Metrics.ProcessingTime.Average);
+                            gauge.WithLabels(item.Name, "criticalTime").Set(item.Metrics.CriticalTime.Average);
+                            gauge.WithLabels(item.Name, "retries").Set(item.Metrics.Retries.Average);
+                            gauge.WithLabels(item.Name, "throughput").Set(item.Metrics.Throughput.Average);
+                            gauge.WithLabels(item.Name, "queueLength").Set(item.Metrics.QueueLength.Average);
                         }
                     }
                 }
