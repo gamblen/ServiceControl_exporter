@@ -4,16 +4,16 @@ using Commands;
 using Config;
 using Flurl;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Prometheus;
 
-public sealed class UpdateCustomChecksMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateCustomChecksMetricsCommand>
+public sealed class UpdateCustomChecksMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : ICommandHandler<UpdateCustomChecksMetricsCommand>
 {
-    public async Task Handle(UpdateCustomChecksMetricsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateCustomChecksMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!configuration.Include.CustomChecks) return;
+            if (!configuration.Include.CustomChecks) return Unit.Value;
 
             var url = Url.Combine(configuration.ServiceControl.Url,
                                   "customchecks");
@@ -36,5 +36,7 @@ public sealed class UpdateCustomChecksMetricsCommandHandler(CollectorDictionary 
         {
             Console.WriteLine(e);
         }
+
+        return Unit.Value;
     }
 }

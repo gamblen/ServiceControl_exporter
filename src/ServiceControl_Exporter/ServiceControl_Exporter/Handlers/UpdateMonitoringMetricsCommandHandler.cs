@@ -4,19 +4,19 @@ using Commands;
 using Config;
 using Flurl;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Prometheus;
 
-public sealed class UpdateMonitoringMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateMonitoringMetricsCommand>
+public sealed class UpdateMonitoringMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : ICommandHandler<UpdateMonitoringMetricsCommand>
 {
-    public async Task Handle(UpdateMonitoringMetricsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateMonitoringMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
             if (!configuration.Include.Monitoring ||
                 configuration.ServiceControl.MonitoringUrls == null ||
                 !configuration.ServiceControl.MonitoringUrls.Any())
-                return;
+                return Unit.Value;
 
             if (!metrics.ContainsKey("servicecontrol_monitoring_endpoints"))
                 //_metrics.Add("servicecontrol_monitoring_endpoints", Metrics.CreateHistogram("servicecontrol_monitoring_endpoints", "monitoring endpoints", "endpoint", "metric"));
@@ -60,5 +60,7 @@ public sealed class UpdateMonitoringMetricsCommandHandler(CollectorDictionary me
         {
             Console.WriteLine(e);
         }
+
+        return Unit.Value;
     }
 }
