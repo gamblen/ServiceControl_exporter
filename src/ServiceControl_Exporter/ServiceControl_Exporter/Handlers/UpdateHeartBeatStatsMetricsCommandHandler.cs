@@ -4,16 +4,16 @@ using Commands;
 using Config;
 using Flurl;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Prometheus;
 
-public sealed class UpdateHeartBeatStatsMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateHeartBeatStatsMetricsCommand>
+public sealed class UpdateHeartBeatStatsMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : ICommandHandler<UpdateHeartBeatStatsMetricsCommand>
 {
-    public async Task Handle(UpdateHeartBeatStatsMetricsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateHeartBeatStatsMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!configuration.Include.HeartBeats) return;
+            if (!configuration.Include.HeartBeats) return Unit.Value;
 
             var url = Url.Combine(configuration.ServiceControl.Url,
                                   "heartbeats",
@@ -34,5 +34,7 @@ public sealed class UpdateHeartBeatStatsMetricsCommandHandler(CollectorDictionar
         {
             Console.WriteLine(e);
         }
+
+        return Unit.Value;
     }
 }

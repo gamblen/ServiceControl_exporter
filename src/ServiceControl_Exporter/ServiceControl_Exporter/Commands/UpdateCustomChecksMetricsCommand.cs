@@ -1,7 +1,7 @@
 ﻿namespace ServiceControl_Exporter.Commands;
 
-using MediatR;
+using Mediator;
 
-public sealed class UpdateCustomChecksMetricsCommand : IRequest
+public sealed class UpdateCustomChecksMetricsCommand : ICommand
 {
 }

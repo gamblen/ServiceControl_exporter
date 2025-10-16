@@ -4,7 +4,7 @@ using System.Net;
 using Commands;
 using Config;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -55,7 +55,7 @@ internal class Program
                                           c.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().Get<AppSettings>());
                                           c.AddSingleton<CollectorDictionary>();
                                           c.AddHostedService<PrometheusExporter>();
-                                          c.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
+                                          c.AddMediator();
                                       })
                    .ConfigureLogging(c => c.AddConsole());
     }

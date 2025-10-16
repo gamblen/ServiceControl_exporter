@@ -4,16 +4,16 @@ using Commands;
 using Config;
 using Flurl;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Prometheus;
 
-public sealed class UpdateErrorMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateErrorMetricsCommand>
+public sealed class UpdateErrorMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : ICommandHandler<UpdateErrorMetricsCommand>
 {
-    public async Task Handle(UpdateErrorMetricsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateErrorMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!configuration.Include.Errors) return;
+            if (!configuration.Include.Errors) return Unit.Value;
 
             var url = Url.Combine(configuration.ServiceControl.Url,
                                   "errors");
@@ -31,5 +31,7 @@ public sealed class UpdateErrorMetricsCommandHandler(CollectorDictionary metrics
         {
             Console.WriteLine(e);
         }
+
+        return Unit.Value;
     }
 }

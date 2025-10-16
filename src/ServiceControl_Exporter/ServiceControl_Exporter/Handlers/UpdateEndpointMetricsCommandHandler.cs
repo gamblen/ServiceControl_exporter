@@ -4,16 +4,16 @@ using Commands;
 using Config;
 using Flurl;
 using Flurl.Http;
-using MediatR;
+using Mediator;
 using Prometheus;
 
-public sealed class UpdateEndpointMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : IRequestHandler<UpdateEndpointStatsMetricsCommand>
+public sealed class UpdateEndpointMetricsCommandHandler(CollectorDictionary metrics, AppSettings configuration) : ICommandHandler<UpdateEndpointStatsMetricsCommand>
 {
-    public async Task Handle(UpdateEndpointStatsMetricsCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Unit> Handle(UpdateEndpointStatsMetricsCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            if (!configuration.Include.Endpoints) return;
+            if (!configuration.Include.Endpoints) return Unit.Value;
 
             var url = Url.Combine(configuration.ServiceControl.Url,
                                   "endpoints");
@@ -37,5 +37,7 @@ public sealed class UpdateEndpointMetricsCommandHandler(CollectorDictionary metr
         {
             Console.WriteLine(e);
         }
+
+        return Unit.Value;
     }
 }

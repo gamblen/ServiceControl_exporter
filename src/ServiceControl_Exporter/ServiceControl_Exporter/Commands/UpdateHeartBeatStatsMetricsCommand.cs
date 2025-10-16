@@ -1,7 +1,7 @@
 ﻿namespace ServiceControl_Exporter.Commands;
 
-using MediatR;
+using Mediator;
 
-public sealed class UpdateHeartBeatStatsMetricsCommand : IRequest
+public sealed class UpdateHeartBeatStatsMetricsCommand : ICommand
 {
 }
