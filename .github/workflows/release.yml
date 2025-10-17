@@ -17,11 +17,11 @@ jobs:
         fetch-depth: 0
         
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.0.0
+      uses: gittools/actions/gitversion/setup@v4.1.0
       with:
         versionSpec: '5.x'        
     - name: Update AssemblyInfo
-      uses: gittools/actions/gitversion/execute@v3.0.0  
+      uses: gittools/actions/gitversion/execute@v4.1.0  
       with:
         useConfigFile: true
         updateAssemblyInfo: true
