@@ -2,7 +2,7 @@ name: CI .NET Windows Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/*" ]
   pull_request:
     branches: [ "main" ]
 
@@ -49,3 +49,4 @@ jobs:
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
+
