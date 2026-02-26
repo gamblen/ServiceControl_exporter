@@ -2,10 +2,14 @@ name: CI .NET Windows Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/*" ]
   pull_request:
     branches: [ "main" ]
-
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
 jobs:
   build:
 
@@ -17,11 +21,11 @@ jobs:
         fetch-depth: 0
         
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v3.0.0
+      uses: gittools/actions/gitversion/setup@v4.3.0
       with:
         versionSpec: '5.x'        
     - name: Update AssemblyInfo
-      uses: gittools/actions/gitversion/execute@v3.0.0  
+      uses: gittools/actions/gitversion/execute@v4.3.0  
       with:
         useConfigFile: true
         updateAssemblyInfo: true
@@ -49,3 +53,5 @@ jobs:
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
+
+
