@@ -5,7 +5,11 @@ on:
     branches: [ "main", "feature/*" ]
   pull_request:
     branches: [ "main" ]
-
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
 jobs:
   build:
 
@@ -49,4 +53,5 @@ jobs:
       with:
         name: artifacts
         path: src/ServiceControl_Exporter/artifacts/**/*
+
 
