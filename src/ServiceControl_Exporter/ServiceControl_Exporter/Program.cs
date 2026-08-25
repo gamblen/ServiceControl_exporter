@@ -1,8 +1,4 @@
-﻿namespace ServiceControl_Exporter;
-
-using System.Net;
-using Commands;
-using Config;
+﻿using System.Net;
 using Flurl.Http;
 using Mediator;
 using Microsoft.Extensions.Configuration;
@@ -10,53 +6,72 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
+using ServiceControl_Exporter;
+using ServiceControl_Exporter.Commands;
+using ServiceControl_Exporter.Config;
 
-internal class Program
-{
-    public static async Task Main(string[] args)
-    {
-        using var host = CreateHostBuilder(args).Build();
+var builder = Host.CreateApplicationBuilder(args);
 
-        var mediator = host.Services.GetRequiredService<IMediator>();
+builder.Services.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().Get<AppSettings>());
+builder.Services.AddSingleton<CollectorDictionary>();
+builder.Services.AddHostedService<PrometheusExporter>();
+builder.Services.AddMediator();
+builder.Logging.AddConsole();
 
-        var appSettings = host.Services.GetRequiredService<AppSettings>();
+var appSettings = builder.Configuration.Get<AppSettings>();
 
-        FlurlHttp.Clients.WithDefaults(settings =>
-                                       {
-                                           settings.ConfigureInnerHandler(handler =>
-                                                                          {
-                                                                              if (!string.IsNullOrWhiteSpace(appSettings.ProxyUrl))
-                                                                              {
-                                                                                  handler.Proxy = new WebProxy(new Uri(appSettings.ProxyUrl));
-                                                                                  handler.UseProxy = true;
-                                                                              }
-                                                                          });
-                                       });
+var registry = Metrics.DefaultRegistry;
 
-        Metrics.DefaultRegistry.AddBeforeCollectCallback(async cancel =>
-                                                         {
-                                                             await mediator.Send(new UpdateEndpointStatsMetricsCommand(), cancel).ConfigureAwait(false);
-                                                             await mediator.Send(new UpdateErrorMetricsCommand(), cancel).ConfigureAwait(false);
-                                                             await mediator.Send(new UpdateCustomChecksMetricsCommand(), cancel).ConfigureAwait(false);
-                                                             await mediator.Send(new UpdateHeartBeatStatsMetricsCommand(), cancel).ConfigureAwait(false);
-                                                             await mediator.Send(new UpdateMonitoringMetricsCommand(), cancel).ConfigureAwait(false);
-                                                         });
+var serverOptions = new KestrelMetricServerOptions
+                    {
+                        Registry = registry,
+                        Hostname = appSettings.Exporter.Host,
+                        Port = appSettings.Exporter.Port
+                    };
+builder.Services.AddSingleton(serverOptions);
 
-        await host.RunAsync();
-    }
+FlurlHttp.Clients.WithDefaults(settings =>
+                               {
+                                   settings.ConfigureInnerHandler(handler =>
+                                                                  {
+                                                                      if (!string.IsNullOrWhiteSpace(appSettings.ProxyUrl))
+                                                                      {
+                                                                          handler.Proxy = new WebProxy(new Uri(appSettings.ProxyUrl));
+                                                                          handler.UseProxy = true;
+                                                                      }
+                                                                  });
+                               });
 
-    private static IHostBuilder CreateHostBuilder(string[] args)
-    {
-        return Host.CreateDefaultBuilder(args)
-                   .UseWindowsService()
-                   .UseSystemd()
-                   .ConfigureServices(c =>
+var host = builder.Build();
+
+var mediator = host.Services.GetRequiredService<IMediator>();
+
+registry.AddBeforeCollectCallback(async cancel =>
+                                  {
+                                      try
                                       {
-                                          c.AddSingleton(provider => provider.GetRequiredService<IConfiguration>().Get<AppSettings>());
-                                          c.AddSingleton<CollectorDictionary>();
-                                          c.AddHostedService<PrometheusExporter>();
-                                          c.AddMediator();
-                                      })
-                   .ConfigureLogging(c => c.AddConsole());
-    }
-}
+                                          var logger = host.Services.GetRequiredService<ILogger<PrometheusExporter>>();
+                                          // If you see this in your container logs, the network route is working
+                                          if (logger.IsEnabled(LogLevel.Debug))
+                                              logger.Log(LogLevel.Debug, "Kestrel handed execution to AddBeforeCollectCallback.");
+
+                                          await mediator.Send(new UpdateEndpointStatsMetricsCommand(), cancel).ConfigureAwait(false);
+                                          await mediator.Send(new UpdateErrorMetricsCommand(), cancel).ConfigureAwait(false);
+                                          await mediator.Send(new UpdateCustomChecksMetricsCommand(), cancel).ConfigureAwait(false);
+                                          await mediator.Send(new UpdateHeartBeatStatsMetricsCommand(), cancel).ConfigureAwait(false);
+                                          await mediator.Send(new UpdateMonitoringMetricsCommand(), cancel).ConfigureAwait(false);
+
+                                          if (logger.IsEnabled(LogLevel.Debug))
+                                              logger.Log(LogLevel.Debug, "Callback completed successfully.");
+                                      }
+                                      catch (Exception ex)
+                                      {
+                                          var logger = host.Services.GetRequiredService<ILogger<PrometheusExporter>>();
+                                          // Kestrel swallows pipeline faults; this forces it out to your container log stream
+                                          if (logger.IsEnabled(LogLevel.Error))
+                                              logger.Log(LogLevel.Error, ex, "An error occurred while collecting metrics.");
+                                          throw; // Allow prometheus-net to handle the 503 response
+                                      }
+                                  });
+
+host.Run();

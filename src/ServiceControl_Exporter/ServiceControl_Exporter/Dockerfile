@@ -2,7 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
-EXPOSE 9002
+EXPOSE 33334
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
