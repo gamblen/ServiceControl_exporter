@@ -2,6 +2,6 @@
 
 public sealed class Exporter
 {
-    public string Host { get; set; } = "localhost";
-    public int Port { get; set; } = 9002;
+    public string Host { get; set; } = "+";
+    public ushort Port { get; set; } = 33334;
 }
