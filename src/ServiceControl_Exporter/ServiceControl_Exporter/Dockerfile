@@ -5,7 +5,6 @@ WORKDIR /app
 EXPOSE 33334
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["ServiceControl_Exporter/ServiceControl_Exporter.csproj", "ServiceControl_Exporter/"]
 RUN dotnet restore "ServiceControl_Exporter/ServiceControl_Exporter.csproj"
