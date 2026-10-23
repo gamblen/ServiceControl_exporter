@@ -18,6 +18,9 @@ builder.Services.AddHostedService<PrometheusExporter>();
 builder.Services.AddMediator();
 builder.Logging.AddConsole();
 
+builder.Services.AddWindowsService();
+builder.Services.AddSystemd();
+
 var appSettings = builder.Configuration.Get<AppSettings>();
 
 var registry = Metrics.DefaultRegistry;
